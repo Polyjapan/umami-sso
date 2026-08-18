@@ -7,10 +7,14 @@ import { checkPassword } from '@/lib/password';
 import prisma from '@/lib/prisma';
 import redis from '@/lib/redis';
 import { parseRequest } from '@/lib/request';
-import { json, unauthorized } from '@/lib/response';
+import { forbidden, json, unauthorized } from '@/lib/response';
 import { getAllUserTeams, getUserByUsername } from '@/queries/prisma';
 
 export async function POST(request: Request) {
+  if (process.env.DISABLE_LOGIN) {
+    return forbidden({ message: 'Password login is disabled' });
+  }
+
   const schema = z.object({
     username: z.string(),
     password: z.string(),

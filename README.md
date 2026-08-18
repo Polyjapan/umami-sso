@@ -173,6 +173,12 @@ If SSO is misconfigured and `DISABLE_LOGIN=true` has locked you out:
 4. Fix the SSO configuration.
 5. Re-enable SSO-only mode if desired (`DISABLE_LOGIN=true`).
 
+### Security notes
+
+- SSO identity is linked to Umami users by **username only**. No per-user IdP subject (`sub`) is stored, so two IdP accounts that resolve to the same username share one Umami user.
+- 2FA applies to password login only. SSO logins bypass it (relevant only in hybrid mode, when password login is still enabled).
+- The local username `admin` is reserved for break-glass access and cannot log in via SSO.
+
 ---
 
 ## 🛟 Support

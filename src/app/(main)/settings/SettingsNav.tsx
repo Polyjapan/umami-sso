@@ -1,7 +1,7 @@
 import { Column, Row, Text, Tooltip, TooltipTrigger } from '@umami/react-zen';
 import { IconLabel } from '@/components/common/IconLabel';
 import Link from '@/components/common/Link';
-import { useMessages, useNavigation } from '@/components/hooks';
+import { useConfig, useMessages, useNavigation } from '@/components/hooks';
 import { ArrowLeft, Settings2, ShieldCheck, UserCircle, Users } from '@/components/icons';
 
 export function SettingsNav({
@@ -13,6 +13,8 @@ export function SettingsNav({
 }) {
   const { t, labels } = useMessages();
   const { renderUrl, pathname } = useNavigation();
+  const { oidcEnabled, loginDisabled } = useConfig() || {};
+  const hideSecurity = !!(loginDisabled && oidcEnabled);
 
   const items = [
     {
@@ -41,12 +43,16 @@ export function SettingsNav({
           path: renderUrl('/settings/teams'),
           icon: <Users />,
         },
-        {
-          id: 'security',
-          label: t(labels.security),
-          path: renderUrl('/settings/security'),
-          icon: <ShieldCheck />,
-        },
+        ...(hideSecurity
+          ? []
+          : [
+              {
+                id: 'security',
+                label: t(labels.security),
+                path: renderUrl('/settings/security'),
+                icon: <ShieldCheck />,
+              },
+            ]),
       ],
     },
   ];

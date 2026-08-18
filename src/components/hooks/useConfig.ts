@@ -12,6 +12,8 @@ export type Config = {
   telemetryDisabled: boolean;
   trackerScriptName?: string;
   updatesDisabled: boolean;
+  oidcEnabled?: boolean;
+  loginDisabled?: boolean;
 };
 
 export function useConfig(): Config {
