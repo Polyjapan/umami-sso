@@ -22,7 +22,9 @@ export function App({ children }) {
   const config = useConfig();
   const { pathname, router, teamId } = useNavigation();
   const { isLoading: isTeamLoading, error: teamError } = useTeamQuery(teamId);
-  const { data: twoFactorStatus } = useTwoFactorStatusQuery(!!user && !config?.cloudMode);
+  const { data: twoFactorStatus } = useTwoFactorStatusQuery(
+    !!user && !config?.cloudMode && !(config?.loginDisabled && config?.oidcEnabled),
+  );
   const needsTwoFactorSetup = !!(twoFactorStatus?.isRequired && !twoFactorStatus?.isEnabled);
 
   useEffect(() => {

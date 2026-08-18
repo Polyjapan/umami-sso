@@ -52,7 +52,7 @@ RUN adduser --system --uid 1001 nextjs
 RUN set -x \
     && apk add --no-cache curl libc6-compat \
     && npm install -g pnpm@${PNPM_VERSION} \
-    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /root/.npm
 
 RUN echo {} > package.json
 
@@ -70,6 +70,11 @@ RUN pnpm add npm-run-all dotenv chalk semver \
 # as the non-root user and fail with a permissions error.
 RUN ls node_modules/.pnpm/@prisma+engines@${PRISMA_VERSION}/node_modules/@prisma/engines/*engine* \
     || (echo "ERROR: Prisma engine binaries missing - @prisma/engines postinstall was blocked" && exit 1)
+
+# Drop the pnpm global store/cache after install. Packages remain in
+# /app/node_modules because pnpm hardlinks store files into that tree.
+RUN pnpm store prune \
+    && rm -rf /root/.local/share/pnpm /root/.cache
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder /app/prisma ./prisma

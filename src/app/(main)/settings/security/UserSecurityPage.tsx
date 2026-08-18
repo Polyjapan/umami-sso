@@ -6,13 +6,15 @@ import { Badge } from '@/components/common/Badge';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Panel } from '@/components/common/Panel';
-import { useMessages, useTwoFactorStatusQuery } from '@/components/hooks';
+import { useConfig, useMessages, useTwoFactorStatusQuery } from '@/components/hooks';
 import { TwoFactorDisableModal } from '@/components/modals/TwoFactorDisableModal';
 import { TwoFactorSetupModal } from '@/components/modals/TwoFactorSetupModal';
 
 export function UserSecurityPage() {
   const { t, labels, messages } = useMessages();
-  const { data: status, isLoading } = useTwoFactorStatusQuery(true);
+  const { oidcEnabled, loginDisabled } = useConfig() || {};
+  const ssoOnly = !!(loginDisabled && oidcEnabled);
+  const { data: status, isLoading } = useTwoFactorStatusQuery(!ssoOnly);
   const queryClient = useQueryClient();
   const [showSetup, setShowSetup] = useState(false);
   const [showDisable, setShowDisable] = useState(false);
@@ -38,31 +40,47 @@ export function UserSecurityPage() {
     queryClient.invalidateQueries({ queryKey: ['2fa-status'] });
   };
 
-  if (isLoading) return null;
+  if (!ssoOnly && isLoading) return null;
 
   return (
     <PageBody>
       <Column gap="6">
         <PageHeader title={t(labels.security)} />
         <Panel>
-          <Column gap="4">
-            <Row alignItems="center" gap="3">
-              <Text weight="bold">{t(labels.twoFactorAuth)}</Text>
+          {ssoOnly ? (
+            <Text>
+              Authentication is managed by SSO. Two-factor authentication is not available.
+            </Text>
+          ) : (
+            <Column gap="4">
+              <Row alignItems="center" gap="3">
+                <Text weight="bold">{t(labels.twoFactorAuth)}</Text>
+                {isEnabled ? (
+                  <Badge variant="good">{t(labels.twoFactorActive)}</Badge>
+                ) : (
+                  <Badge variant="gray">{t(labels.twoFactorStatusNotConfigured)}</Badge>
+                )}
+              </Row>
+
               {isEnabled ? (
-                <Badge variant="good">{t(labels.twoFactorActive)}</Badge>
+                <Text>{t(messages.twoFactorActiveDescription)}</Text>
               ) : (
-                <Badge variant="gray">{t(labels.twoFactorStatusNotConfigured)}</Badge>
+                <Text>{t(messages.twoFactorUserDescription)}</Text>
               )}
-            </Row>
 
-            {isEnabled ? (
-              <Text>{t(messages.twoFactorActiveDescription)}</Text>
-            ) : (
-              <Text>{t(messages.twoFactorUserDescription)}</Text>
-            )}
-
-            {isEnabled && isRequired ? (
-              <TooltipTrigger>
+              {isEnabled && isRequired ? (
+                <TooltipTrigger>
+                  <Row alignItems="center" gap="3">
+                    <Switch
+                      isSelected={isEnabled}
+                      isDisabled={isEnabled && isRequired}
+                      onChange={handleToggle}
+                    />
+                    <Text>{t(labels.twoFactorEnable)}</Text>
+                  </Row>
+                  <Tooltip>{t(messages.twoFactorRequiredMessage)}</Tooltip>
+                </TooltipTrigger>
+              ) : (
                 <Row alignItems="center" gap="3">
                   <Switch
                     isSelected={isEnabled}
@@ -71,30 +89,20 @@ export function UserSecurityPage() {
                   />
                   <Text>{t(labels.twoFactorEnable)}</Text>
                 </Row>
-                <Tooltip>{t(messages.twoFactorRequiredMessage)}</Tooltip>
-              </TooltipTrigger>
-            ) : (
-              <Row alignItems="center" gap="3">
-                <Switch
-                  isSelected={isEnabled}
-                  isDisabled={isEnabled && isRequired}
-                  onChange={handleToggle}
-                />
-                <Text>{t(labels.twoFactorEnable)}</Text>
-              </Row>
-            )}
+              )}
 
-            {isEnabled && isRequired && (
-              <Text size="sm" color="muted">
-                {t(messages.twoFactorRequiredMessage)}
-              </Text>
-            )}
-          </Column>
+              {isEnabled && isRequired && (
+                <Text size="sm" color="muted">
+                  {t(messages.twoFactorRequiredMessage)}
+                </Text>
+              )}
+            </Column>
+          )}
         </Panel>
       </Column>
 
-      {showSetup && <TwoFactorSetupModal required={false} onClose={handleSetupClose} />}
-      {showDisable && (
+      {showSetup && !ssoOnly && <TwoFactorSetupModal required={false} onClose={handleSetupClose} />}
+      {showDisable && !ssoOnly && (
         <TwoFactorDisableModal
           onClose={() => setShowDisable(false)}
           onSuccess={handleDisableSuccess}

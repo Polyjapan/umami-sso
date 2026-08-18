@@ -10,6 +10,7 @@ const TRACKER_PATH = '/script.js';
 const RECORDER_PATH = '/recorder.js';
 const COLLECT_PATH = '/api/send';
 const LOGIN_PATH = '/login';
+const LOGIN_SSO_PATH = '/login/sso';
 const BASE_PATH = process.env.BASE_PATH || '';
 
 const apiHeaders = {
@@ -74,10 +75,26 @@ function applyStaticScriptHeaders(request: NextRequest, response: NextResponse) 
   }
 }
 
-function disableLogin(request: NextRequest) {
-  const loginDisabled = process.env.DISABLE_LOGIN;
+function isOidcConfigured() {
+  return Boolean(
+    process.env.OIDC_ISSUER?.trim() &&
+      process.env.OIDC_CLIENT_ID?.trim() &&
+      process.env.OIDC_CLIENT_SECRET?.trim(),
+  );
+}
 
-  if (loginDisabled && matchesConfiguredPath(request.nextUrl.pathname, LOGIN_PATH, BASE_PATH)) {
+function disableLogin(request: NextRequest) {
+  if (!process.env.DISABLE_LOGIN) {
+    return;
+  }
+
+  const { pathname } = request.nextUrl;
+
+  if (matchesConfiguredPath(pathname, LOGIN_SSO_PATH, BASE_PATH)) {
+    return;
+  }
+
+  if (matchesConfiguredPath(pathname, LOGIN_PATH, BASE_PATH) && !isOidcConfigured()) {
     return new NextResponse('Access denied', { status: 403 });
   }
 }

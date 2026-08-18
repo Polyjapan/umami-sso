@@ -1,4 +1,5 @@
 import { isRelationalOnly } from '@/lib/db';
+import { isOidcEnabled } from '@/lib/oidc';
 import { parseRequest } from '@/lib/request';
 import { json } from '@/lib/response';
 
@@ -21,5 +22,7 @@ export async function GET(request: Request) {
     telemetryDisabled: !!process.env.DISABLE_TELEMETRY,
     trackerScriptName: process.env.TRACKER_SCRIPT_NAME,
     updatesDisabled: !!process.env.DISABLE_UPDATES,
+    oidcEnabled: isOidcEnabled(),
+    loginDisabled: !!process.env.DISABLE_LOGIN,
   });
 }
