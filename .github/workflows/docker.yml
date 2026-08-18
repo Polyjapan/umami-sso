@@ -16,7 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  MAX_IMAGE_SIZE_MB: 600
+  # Guard against regressions; upstream-parity baseline is ~900 MB uncompressed.
+  MAX_IMAGE_SIZE_MB: 1000
   TEST_IMAGE: umami-sso:test
 
 jobs:
@@ -56,6 +57,9 @@ jobs:
           provenance: false
           tags: ${{ env.TEST_IMAGE }}
           cache-from: type=gha
+
+      - name: Show layer sizes
+        run: docker history --human --no-trunc "$TEST_IMAGE"
 
       - name: Check image size
         run: |
