@@ -8,6 +8,8 @@
   <i>Umami is a privacy-first analytics platform. Traffic, campaigns, behavior, conversions, and revenue in one place — no cookies, no surveillance, self-hosted or in the cloud.</i>
 </p>
 
+> ⚠️ **This is a fork of [umami-software/umami](https://github.com/umami-software/umami) adding OIDC SSO (see below). It is maintained for internal use and is not intended for public use — use at your own risk.**
+
 <p align="center">
   <a href="https://github.com/umami-software/umami/releases"><img src="https://img.shields.io/github/release/umami-software/umami.svg" alt="GitHub Release" /></a>
   <a href="https://github.com/umami-software/umami/blob/master/LICENSE"><img src="https://img.shields.io/github/license/umami-software/umami.svg" alt="MIT License" /></a>
@@ -33,8 +35,8 @@ A detailed getting started guide can be found at [umami.is/docs](https://umami.i
 ### Get the source code and install packages
 
 ```bash
-git clone https://github.com/umami-software/umami.git
-cd umami
+git clone https://github.com/Polyjapan/umami-sso.git
+cd umami-sso
 pnpm install
 ```
 
