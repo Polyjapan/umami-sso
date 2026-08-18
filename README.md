@@ -147,7 +147,7 @@ When OIDC is configured **and** `DISABLE_LOGIN=true`:
 
 ### Auto-provisioning and roles
 
-On first SSO login, a local user is created with a random unusable password. The username is taken from `preferred_username`, then `email`, then `sso-<sub>`.
+On first SSO login, a local user is created with a random unusable password. The username is taken from verified email, then `preferred_username`, then `sso-<sub>`.
 
 Roles are read from the Zitadel project-roles claim (`OIDC_ROLES_CLAIM`). The claim is a JSON object whose keys are the role names (Zitadel format):
 
@@ -178,6 +178,7 @@ If SSO is misconfigured and `DISABLE_LOGIN=true` has locked you out:
 ### Security notes
 
 - SSO identity is linked to Umami users by **username only**. No per-user IdP subject (`sub`) is stored, so two IdP accounts that resolve to the same username share one Umami user.
+- The email claim is only used when the IdP does not report it as explicitly unverified (`email_verified !== false`).
 - 2FA applies to password login only. SSO logins bypass it (relevant only in hybrid mode, when password login is still enabled).
 - The local username `admin` is reserved for break-glass access and cannot log in via SSO.
 

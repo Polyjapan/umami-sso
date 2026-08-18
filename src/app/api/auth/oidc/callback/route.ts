@@ -5,6 +5,7 @@ import { hash, secret, uuid } from '@/lib/crypto';
 import { createSecureToken } from '@/lib/jwt';
 import {
   extractRoleFromClaims,
+  extractUsername,
   getAppBasePath,
   getOidcCookieOptions,
   getRequestOrigin,
@@ -21,20 +22,6 @@ import { notFound } from '@/lib/response';
 import { createUser, getUserByUsername, updateUser } from '@/queries/prisma';
 
 export const dynamic = 'force-dynamic';
-
-function extractUsername(claims: Record<string, unknown>): string {
-  const preferred =
-    typeof claims.preferred_username === 'string' ? claims.preferred_username.trim() : '';
-  const email = typeof claims.email === 'string' ? claims.email.trim() : '';
-  const sub = typeof claims.sub === 'string' ? claims.sub.trim() : '';
-  const username = (preferred || email || (sub ? `sso-${sub}` : '')).toLowerCase();
-
-  if (!username) {
-    throw new Error('OIDC claims did not include a usable username');
-  }
-
-  return username.slice(0, 255);
-}
 
 function ssoRedirect(request: NextRequest, params: Record<string, string>, hash?: string) {
   const dest = new URL(`${getAppBasePath()}/login/sso`, getRequestOrigin(request));

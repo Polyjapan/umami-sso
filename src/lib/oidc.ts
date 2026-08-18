@@ -221,6 +221,21 @@ function collectRoleNames(value: unknown): string[] {
   return [];
 }
 
+export function extractUsername(claims: Record<string, unknown>): string {
+  const email = typeof claims.email === 'string' ? claims.email.trim() : '';
+  const preferred =
+    typeof claims.preferred_username === 'string' ? claims.preferred_username.trim() : '';
+  const sub = typeof claims.sub === 'string' ? claims.sub.trim() : '';
+  const usableEmail = email && claims.email_verified !== false ? email : '';
+  const username = (usableEmail || preferred || (sub ? `sso-${sub}` : '')).toLowerCase();
+
+  if (!username) {
+    throw new Error('OIDC claims did not include a usable username');
+  }
+
+  return username.slice(0, 255);
+}
+
 export function extractRoleFromClaims(
   claims: Record<string, unknown> | null | undefined,
 ): Role | null {

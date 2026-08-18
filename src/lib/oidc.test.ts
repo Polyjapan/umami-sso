@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { ROLES } from '@/lib/constants';
-import { extractRoleFromClaims } from './oidc';
+import { extractRoleFromClaims, extractUsername } from './oidc';
 
 const DEFAULT_ROLES_CLAIM = 'urn:zitadel:iam:org:project:roles';
 
@@ -114,5 +114,54 @@ describe('extractRoleFromClaims', () => {
     expect(extractRoleFromClaims({})).toBeNull();
     expect(extractRoleFromClaims(null)).toBeNull();
     expect(extractRoleFromClaims(undefined)).toBeNull();
+  });
+});
+
+describe('extractUsername', () => {
+  test('prefers email over preferred_username', () => {
+    expect(
+      extractUsername({
+        email: 'user@example.com',
+        preferred_username: 'nickname',
+        sub: 'abc',
+      }),
+    ).toBe('user@example.com');
+  });
+
+  test('falls back to preferred_username when email is unverified', () => {
+    expect(
+      extractUsername({
+        email: 'user@example.com',
+        email_verified: false,
+        preferred_username: 'nickname',
+        sub: 'abc',
+      }),
+    ).toBe('nickname');
+  });
+
+  test('falls back to preferred_username when email is missing', () => {
+    expect(
+      extractUsername({
+        preferred_username: 'nickname',
+        sub: 'abc',
+      }),
+    ).toBe('nickname');
+  });
+
+  test('falls back to sso-<sub> when email and preferred_username are missing', () => {
+    expect(extractUsername({ sub: 'abc-123' })).toBe('sso-abc-123');
+  });
+
+  test('lowercases the selected username', () => {
+    expect(
+      extractUsername({
+        email: 'User@Example.COM',
+        preferred_username: 'Nickname',
+      }),
+    ).toBe('user@example.com');
+  });
+
+  test('throws when no usable username can be derived', () => {
+    expect(() => extractUsername({})).toThrow('OIDC claims did not include a usable username');
   });
 });
