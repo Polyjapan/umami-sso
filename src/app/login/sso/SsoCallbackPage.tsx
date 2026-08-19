@@ -1,7 +1,7 @@
 'use client';
 import { Button, Column, Heading, Icon, Loading, Text } from '@umami/react-zen';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApi } from '@/components/hooks';
 import { Logo } from '@/components/svg';
 import { removeClientAuthToken, setClientAuthToken } from '@/lib/client';
@@ -28,9 +28,16 @@ export function SsoCallbackPage() {
   const searchParams = useSearchParams();
   const { post } = useApi();
   const [error, setError] = useState<string | null>(null);
+  const handledRef = useRef(false);
   const ssoLoginUrl = `${process.env.basePath || ''}/api/auth/oidc/login`;
 
   useEffect(() => {
+    if (handledRef.current) {
+      return;
+    }
+
+    handledRef.current = true;
+
     const errorCode = searchParams.get('error');
 
     if (errorCode) {
