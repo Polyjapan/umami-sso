@@ -8,6 +8,7 @@ const originalEnv = {
   OIDC_ROLES_CLAIM: process.env.OIDC_ROLES_CLAIM,
   OIDC_WRITE_ROLE: process.env.OIDC_WRITE_ROLE,
   OIDC_VIEW_ROLE: process.env.OIDC_VIEW_ROLE,
+  OIDC_DEFAULT_ROLE: process.env.OIDC_DEFAULT_ROLE,
 };
 
 function restoreEnv() {
@@ -24,6 +25,7 @@ beforeEach(() => {
   delete process.env.OIDC_ROLES_CLAIM;
   delete process.env.OIDC_WRITE_ROLE;
   delete process.env.OIDC_VIEW_ROLE;
+  delete process.env.OIDC_DEFAULT_ROLE;
 });
 
 afterEach(() => {
@@ -114,6 +116,42 @@ describe('extractRoleFromClaims', () => {
     expect(extractRoleFromClaims({})).toBeNull();
     expect(extractRoleFromClaims(null)).toBeNull();
     expect(extractRoleFromClaims(undefined)).toBeNull();
+  });
+
+  test('returns OIDC_DEFAULT_ROLE when no matching role is present', () => {
+    process.env.OIDC_DEFAULT_ROLE = 'view-only';
+
+    expect(extractRoleFromClaims({})).toBe(ROLES.viewOnly);
+  });
+
+  test('does not apply OIDC_DEFAULT_ROLE when a write or view role is present', () => {
+    process.env.OIDC_DEFAULT_ROLE = 'view-only';
+
+    expect(
+      extractRoleFromClaims({
+        [DEFAULT_ROLES_CLAIM]: {
+          write: { '123': 'Acme' },
+        },
+      }),
+    ).toBe(ROLES.admin);
+
+    expect(
+      extractRoleFromClaims({
+        [DEFAULT_ROLES_CLAIM]: {
+          'view-only': { '123': 'Acme' },
+        },
+      }),
+    ).toBe(ROLES.viewOnly);
+  });
+
+  test('ignores invalid OIDC_DEFAULT_ROLE values', () => {
+    process.env.OIDC_DEFAULT_ROLE = 'superadmin';
+
+    expect(extractRoleFromClaims({})).toBeNull();
+  });
+
+  test('returns null when OIDC_DEFAULT_ROLE is unset and no role matches', () => {
+    expect(extractRoleFromClaims({})).toBeNull();
   });
 });
 

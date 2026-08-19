@@ -130,6 +130,7 @@ OIDC_CLIENT_SECRET=
 # OIDC_ROLES_CLAIM=urn:zitadel:iam:org:project:roles
 # OIDC_WRITE_ROLE=write
 # OIDC_VIEW_ROLE=view-only
+# OIDC_DEFAULT_ROLE=view-only
 # DISABLE_LOGIN=true
 ```
 
@@ -141,6 +142,7 @@ See `.env.example` for a copy-paste template. The Docker Compose file uses the f
 
 When OIDC is configured **and** `DISABLE_LOGIN=true`:
 
+- The login page automatically redirects to the identity provider. The "Sign in with SSO" button remains as a fallback.
 - The password form on the login page is hidden.
 - `POST /api/auth/login` returns **403**.
 - Password change and 2FA UI are hidden.
@@ -153,7 +155,7 @@ Roles are read from the Zitadel project-roles claim (`OIDC_ROLES_CLAIM`). The cl
 
 - The user has the `write` role (`OIDC_WRITE_ROLE`) → Umami role `admin`.
 - The user has the `view-only` role (`OIDC_VIEW_ROLE`) → Umami role `view-only`.
-- Neither role → login is denied.
+- Neither role → login is denied, unless `OIDC_DEFAULT_ROLE` is set to `admin` or `view-only`.
 
 Roles are re-synced on every login. Removing a Zitadel role downgrades the user at the next login. The seeded local `admin` account is never modified by this sync.
 
@@ -164,6 +166,8 @@ Roles are re-synced on every login. Removing a Zitadel role downgrades the user 
 3. Create project roles `write` and `view-only`. These names are configurable via `OIDC_WRITE_ROLE` / `OIDC_VIEW_ROLE` if you want different names.
 4. Enable role assertion in tokens so the `urn:zitadel:iam:org:project:roles` claim is emitted.
 5. Assign roles to users.
+
+If the Zitadel project has **Check for Project on Authentication** (grant check) enabled, users without an assigned project role are rejected by Zitadel itself (`Errors.User.GrantRequired`) before reaching Umami. Either disable that check and set `OIDC_DEFAULT_ROLE=view-only`, or ensure roles are assigned before first login.
 
 ### Break-glass (local admin)
 
