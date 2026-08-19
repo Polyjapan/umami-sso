@@ -9,9 +9,11 @@ import {
   Icon,
   Loading,
   PasswordField,
+  Text,
   TextField,
 } from '@umami/react-zen';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { useConfig, useMessages, useUpdateQuery } from '@/components/hooks';
 import { Logo } from '@/components/svg';
 import { setClientAuthToken } from '@/lib/client';
@@ -26,6 +28,14 @@ export function LoginForm() {
   const loginDisabled = !!config?.loginDisabled;
   const ssoOnly = oidcEnabled && loginDisabled;
   const ssoLoginUrl = `${process.env.basePath || ''}/api/auth/oidc/login`;
+
+  useEffect(() => {
+    if (!ssoOnly) {
+      return;
+    }
+
+    window.location.href = ssoLoginUrl;
+  }, [ssoOnly, ssoLoginUrl]);
 
   const handleSubmit = async (data: any) => {
     await mutateAsync(data, {
@@ -57,9 +67,12 @@ export function LoginForm() {
       </Icon>
       <Heading>umami</Heading>
       {oidcEnabled && (
-        <Button variant="primary" style={{ minWidth: 300 }} onPress={handleSso}>
-          Sign in with SSO
-        </Button>
+        <Column alignItems="center" gap="4">
+          {ssoOnly && <Text>Redirecting to your identity provider…</Text>}
+          <Button variant="primary" style={{ minWidth: 300 }} onPress={handleSso}>
+            Sign in with SSO
+          </Button>
+        </Column>
       )}
       {!ssoOnly && (
         <Form onSubmit={handleSubmit} error={getErrorMessage(error)} style={{ minWidth: 300 }}>

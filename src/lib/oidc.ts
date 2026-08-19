@@ -48,6 +48,17 @@ function getViewRoleName(): string {
   return readEnv('OIDC_VIEW_ROLE') || DEFAULT_VIEW_ROLE;
 }
 
+// Fallback when the IdP does not gate on project roles (e.g. Zitadel grant check disabled).
+function getDefaultRole(): Role | null {
+  const value = readEnv('OIDC_DEFAULT_ROLE');
+
+  if (value === ROLES.admin || value === ROLES.viewOnly) {
+    return value;
+  }
+
+  return null;
+}
+
 function getScope(): string {
   return readEnv('OIDC_SCOPE') || DEFAULT_SCOPE;
 }
@@ -255,5 +266,5 @@ export function extractRoleFromClaims(
     return ROLES.viewOnly;
   }
 
-  return null;
+  return getDefaultRole();
 }
