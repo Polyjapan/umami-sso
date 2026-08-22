@@ -1,7 +1,8 @@
-import { beforeEach, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { BOARD_TYPES } from '@/lib/boards';
-import { getReport } from '@/queries/prisma';
+import { getBoard, getReport } from '@/queries/prisma';
 import {
+  canViewBoard,
   canViewBoardEntities,
   hasValidBoardReports,
   stripInvalidBoardReports,
@@ -32,6 +33,8 @@ vi.mock('./link', () => ({
   canViewLink: vi.fn(),
 }));
 
+const adminUser = { id: 'admin-1', username: 'admin', role: 'admin', isAdmin: true };
+const viewOnlyUser = { id: 'user-2', username: 'viewer', role: 'view-only', isAdmin: false };
 const auth = {
   user: {
     id: 'user-1',
@@ -49,6 +52,24 @@ beforeEach(() => {
   vi.mocked(canViewPixel).mockReset();
   vi.mocked(canViewLink).mockReset();
   vi.mocked(getReport).mockReset();
+  vi.mocked(getBoard).mockReset();
+});
+
+describe('canViewBoard', () => {
+  test('allows admins without a lookup', async () => {
+    await expect(canViewBoard({ user: adminUser }, 'board-1')).resolves.toBe(true);
+    expect(getBoard).not.toHaveBeenCalled();
+  });
+
+  test('allows view-only without a lookup', async () => {
+    await expect(canViewBoard({ user: viewOnlyUser }, 'board-1')).resolves.toBe(true);
+    expect(getBoard).not.toHaveBeenCalled();
+  });
+
+  test('denies a non-owner of a user-owned board', async () => {
+    vi.mocked(getBoard).mockResolvedValue({ userId: 'other' } as any);
+    await expect(canViewBoard({ user: auth.user }, 'board-1')).resolves.toBe(false);
+  });
 });
 
 test('canViewBoardEntities validates board IDs with user auth only', async () => {

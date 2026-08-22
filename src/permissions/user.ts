@@ -1,4 +1,9 @@
+import { ROLES } from '@/lib/constants';
 import type { Auth } from '@/lib/types';
+
+export function canViewAllResources({ user }: Auth): boolean {
+  return Boolean(user && (user.isAdmin || user.role === ROLES.viewOnly));
+}
 
 export async function canCreateUser({ user }: Auth) {
   return user?.isAdmin ?? false;

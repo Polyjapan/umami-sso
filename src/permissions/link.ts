@@ -2,9 +2,10 @@ import { hasPermission } from '@/lib/auth';
 import { PERMISSIONS } from '@/lib/constants';
 import type { Auth } from '@/lib/types';
 import { getLink, getTeamUser } from '@/queries/prisma';
+import { canViewAllResources } from './user';
 
 export async function canViewLink({ user, shareToken }: Auth, linkId: string) {
-  if (user?.isAdmin) {
+  if (canViewAllResources({ user })) {
     return true;
   }
 

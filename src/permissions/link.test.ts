@@ -20,6 +20,7 @@ vi.mock('@/lib/auth', async () => {
 
 const adminUser = { id: 'admin-1', username: 'admin', role: 'admin', isAdmin: true };
 const normalUser = { id: 'user-1', username: 'user', role: 'user', isAdmin: false };
+const viewOnlyUser = { id: 'user-2', username: 'viewer', role: 'view-only', isAdmin: false };
 
 beforeEach(() => {
   vi.mocked(getLink).mockReset();
@@ -29,6 +30,11 @@ beforeEach(() => {
 describe('canViewLink', () => {
   test('allows admins without a lookup', async () => {
     await expect(canViewLink({ user: adminUser }, 'link-1')).resolves.toBe(true);
+    expect(getLink).not.toHaveBeenCalled();
+  });
+
+  test('allows view-only without a lookup', async () => {
+    await expect(canViewLink({ user: viewOnlyUser }, 'link-1')).resolves.toBe(true);
     expect(getLink).not.toHaveBeenCalled();
   });
 

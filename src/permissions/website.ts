@@ -4,9 +4,10 @@ import { getEntity } from '@/lib/entity';
 import prisma from '@/lib/prisma';
 import type { Auth } from '@/lib/types';
 import { getTeamUser, getWebsite } from '@/queries/prisma';
+import { canViewAllResources } from './user';
 
 export async function canViewWebsite({ user, shareToken }: Auth, websiteId: string) {
-  if (user?.isAdmin) {
+  if (canViewAllResources({ user })) {
     return true;
   }
 
@@ -47,7 +48,7 @@ export async function canViewBatchWebsites({ user, shareToken }: Auth, websiteId
 
   const requestedIds = Array.from(new Set(websiteIds));
 
-  if (user?.isAdmin) {
+  if (canViewAllResources({ user })) {
     return requestedIds;
   }
 
@@ -113,7 +114,7 @@ export async function canViewBatchWebsites({ user, shareToken }: Auth, websiteId
 }
 
 export async function canViewAllWebsites({ user }: Auth) {
-  return user?.isAdmin ?? false;
+  return canViewAllResources({ user });
 }
 
 export async function canCreateWebsite({ user }: Auth) {
