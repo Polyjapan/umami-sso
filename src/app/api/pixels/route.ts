@@ -3,8 +3,8 @@ import { uuid } from '@/lib/crypto';
 import { getQueryFilters, parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { pagingParams, searchParams, sortingParams } from '@/lib/schema';
-import { canCreateTeamWebsite, canCreateWebsite } from '@/permissions';
-import { createPixel, getUserPixels } from '@/queries/prisma';
+import { canCreateTeamWebsite, canCreateWebsite, canViewAllResources } from '@/permissions';
+import { createPixel, getPixels, getUserPixels } from '@/queries/prisma';
 
 export async function GET(request: Request) {
   const schema = z.object({
@@ -20,6 +20,10 @@ export async function GET(request: Request) {
   }
 
   const filters = await getQueryFilters(query);
+
+  if (canViewAllResources(auth)) {
+    return json(await getPixels({}, filters));
+  }
 
   const links = await getUserPixels(auth.user.id, filters);
 

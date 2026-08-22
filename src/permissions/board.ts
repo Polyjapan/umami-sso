@@ -5,6 +5,7 @@ import type { Auth, BoardComponentConfig, BoardParameters } from '@/lib/types';
 import { getBoard, getReport, getTeamUser } from '@/queries/prisma';
 import { canViewLink } from './link';
 import { canViewPixel } from './pixel';
+import { canViewAllResources } from './user';
 import { canViewWebsite } from './website';
 
 const BOARD_COMPONENT_REPORT_TYPES = {
@@ -152,7 +153,7 @@ export async function stripInvalidBoardReports(
 }
 
 export async function canViewBoard({ user, shareToken }: Auth, boardId: string) {
-  if (user?.isAdmin) {
+  if (canViewAllResources({ user })) {
     return true;
   }
 

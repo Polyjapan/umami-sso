@@ -68,6 +68,11 @@ describe('canViewWebsite', () => {
     expect(getEntity).not.toHaveBeenCalled();
   });
 
+  test('allows view-only without any lookup', async () => {
+    await expect(canViewWebsite({ user: viewOnlyUser }, 'website-1')).resolves.toBe(true);
+    expect(getEntity).not.toHaveBeenCalled();
+  });
+
   test('allows a matching single share token id', async () => {
     await expect(
       canViewWebsite({ shareToken: { websiteId: 'website-1' } as any }, 'website-1'),
@@ -136,6 +141,13 @@ describe('canViewBatchWebsites', () => {
     ]);
   });
 
+  test('returns all deduped ids for view-only', async () => {
+    await expect(canViewBatchWebsites({ user: viewOnlyUser }, ['a', 'a', 'b'])).resolves.toEqual([
+      'a',
+      'b',
+    ]);
+  });
+
   test('returns only share-allowed ids when there is no user', async () => {
     await expect(
       canViewBatchWebsites({ shareToken: { websiteIds: ['a'] } as any }, ['a', 'b']),
@@ -173,6 +185,10 @@ describe('canViewBatchWebsites', () => {
 describe('canViewAllWebsites', () => {
   test('allows admins', async () => {
     await expect(canViewAllWebsites({ user: adminUser })).resolves.toBe(true);
+  });
+
+  test('allows view-only', async () => {
+    await expect(canViewAllWebsites({ user: viewOnlyUser })).resolves.toBe(true);
   });
 
   test('denies non-admins', async () => {
@@ -237,6 +253,11 @@ describe('canUpdateWebsite', () => {
     vi.mocked(getTeamUser).mockResolvedValue({ role: 'team-view-only' } as any);
     await expect(canUpdateWebsite({ user: normalUser }, 'website-1')).resolves.toBe(false);
   });
+
+  test('denies a view-only role for another user website', async () => {
+    vi.mocked(getWebsite).mockResolvedValue({ userId: 'other' } as any);
+    await expect(canUpdateWebsite({ user: viewOnlyUser }, 'website-1')).resolves.toBe(false);
+  });
 });
 
 describe('canDeleteWebsite', () => {
@@ -246,6 +267,11 @@ describe('canDeleteWebsite', () => {
 
   test('allows admins', async () => {
     await expect(canDeleteWebsite({ user: adminUser }, 'website-1')).resolves.toBe(true);
+  });
+
+  test('denies a view-only role for another user website', async () => {
+    vi.mocked(getWebsite).mockResolvedValue({ userId: 'other' } as any);
+    await expect(canDeleteWebsite({ user: viewOnlyUser }, 'website-1')).resolves.toBe(false);
   });
 
   test('denies when website is missing', async () => {

@@ -3,13 +3,14 @@ import { PERMISSIONS } from '@/lib/constants';
 import { getEntity } from '@/lib/entity';
 import type { Auth } from '@/lib/types';
 import { getTeamUser } from '@/queries/prisma';
+import { canViewAllResources } from './user';
 
 export async function canViewEntity({ user }: Auth, entityId: string) {
   if (!user) {
     return false;
   }
 
-  if (user.isAdmin) {
+  if (canViewAllResources({ user })) {
     return true;
   }
 

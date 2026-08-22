@@ -7,10 +7,11 @@ import { pagingParams, searchParams, sortingParams } from '@/lib/schema';
 import {
   canCreateTeamWebsite,
   canCreateWebsite,
+  canViewAllResources,
   canViewBoardEntities,
   hasValidBoardReports,
 } from '@/permissions';
-import { createBoard, getUserBoards } from '@/queries/prisma';
+import { createBoard, getBoards, getUserBoards } from '@/queries/prisma';
 
 export async function GET(request: Request) {
   const schema = z.object({
@@ -26,6 +27,21 @@ export async function GET(request: Request) {
   }
 
   const filters = await getQueryFilters(query);
+
+  if (canViewAllResources(auth)) {
+    return json(
+      await getBoards(
+        {
+          where: {
+            type: {
+              not: BOARD_TYPES.dashboard,
+            },
+          },
+        },
+        filters,
+      ),
+    );
+  }
 
   const boards = await getUserBoards(auth.user.id, filters);
 

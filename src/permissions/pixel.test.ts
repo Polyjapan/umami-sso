@@ -20,6 +20,7 @@ vi.mock('@/lib/auth', async () => {
 
 const adminUser = { id: 'admin-1', username: 'admin', role: 'admin', isAdmin: true };
 const normalUser = { id: 'user-1', username: 'user', role: 'user', isAdmin: false };
+const viewOnlyUser = { id: 'user-2', username: 'viewer', role: 'view-only', isAdmin: false };
 
 beforeEach(() => {
   vi.mocked(getPixel).mockReset();
@@ -29,6 +30,11 @@ beforeEach(() => {
 describe('canViewPixel', () => {
   test('allows admins without a lookup', async () => {
     await expect(canViewPixel({ user: adminUser }, 'pixel-1')).resolves.toBe(true);
+    expect(getPixel).not.toHaveBeenCalled();
+  });
+
+  test('allows view-only without a lookup', async () => {
+    await expect(canViewPixel({ user: viewOnlyUser }, 'pixel-1')).resolves.toBe(true);
     expect(getPixel).not.toHaveBeenCalled();
   });
 

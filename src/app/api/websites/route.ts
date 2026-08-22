@@ -6,9 +6,13 @@ import { getQueryFilters, parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { pagingParams, searchParams, sortingParams } from '@/lib/schema';
 import { getCloudWebsiteLimit } from '@/lib/subscription';
-import { canCreateTeamWebsite, canCreateWebsite } from '@/permissions';
+import { canCreateTeamWebsite, canCreateWebsite, canViewAllResources } from '@/permissions';
 import { createShare, createWebsite, getTeamWebsiteCount, getWebsiteCount } from '@/queries/prisma';
-import { getAllUserWebsitesIncludingTeamAccess, getUserWebsites } from '@/queries/prisma/website';
+import {
+  getAllUserWebsitesIncludingTeamAccess,
+  getUserWebsites,
+  getWebsites,
+} from '@/queries/prisma/website';
 
 export async function GET(request: Request) {
   const schema = z.object({
@@ -27,6 +31,24 @@ export async function GET(request: Request) {
   const userId = auth.user.id;
 
   const filters = await getQueryFilters(query);
+
+  if (canViewAllResources(auth)) {
+    return json(
+      await getWebsites(
+        {
+          include: {
+            user: {
+              select: {
+                username: true,
+                id: true,
+              },
+            },
+          },
+        },
+        filters,
+      ),
+    );
+  }
 
   if (query.includeTeams) {
     return json(await getAllUserWebsitesIncludingTeamAccess(userId, filters));
