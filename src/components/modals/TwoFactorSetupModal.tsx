@@ -2,7 +2,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
-  AlertDescription,
   AlertTitle,
   Box,
   Button,
@@ -58,7 +57,7 @@ interface TwoFactorSetupModalProps {
 }
 
 export function TwoFactorSetupModal({ required, onClose }: TwoFactorSetupModalProps) {
-  const { t, labels, messages } = useMessages();
+  const { t, labels, messages, getErrorMessage } = useMessages();
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
   const [otpValue, setOtpValue] = useState('');
@@ -79,7 +78,7 @@ export function TwoFactorSetupModal({ required, onClose }: TwoFactorSetupModalPr
           setQrCodeDataUrl(data.qrCodeDataUrl);
           setManualKey(data.manualKey);
         },
-        onError: () => setError(t(messages.error)),
+        onError: (err: any) => setError(getErrorMessage(err) || t(messages.error)),
       },
     );
   }, []);
@@ -92,7 +91,7 @@ export function TwoFactorSetupModal({ required, onClose }: TwoFactorSetupModalPr
       const data: any = await confirm({ token });
       setBackupCodes(data.backupCodes);
     } catch (err: any) {
-      setError(err.message || t(messages.error));
+      setError(getErrorMessage(err) || t(messages.error));
     }
   };
 
@@ -193,8 +192,7 @@ export function TwoFactorSetupModal({ required, onClose }: TwoFactorSetupModalPr
 
               {error && (
                 <Alert variant="danger">
-                  <AlertTitle>{t(messages.error)}</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertTitle>{error}</AlertTitle>
                 </Alert>
               )}
 

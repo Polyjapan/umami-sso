@@ -21,6 +21,8 @@ export function UserSecurityPage() {
 
   const isEnabled = status?.isEnabled ?? false;
   const isRequired = status?.isRequired ?? false;
+  const isConfigured = status?.isConfigured;
+  const showConfigurationError = isConfigured === false;
 
   const handleToggle = (value: boolean) => {
     if (value) {
@@ -62,13 +64,15 @@ export function UserSecurityPage() {
                 )}
               </Row>
 
-              {isEnabled ? (
+              {showConfigurationError ? (
+                <Text>{t(messages.twoFactorErrorNotConfigured)}</Text>
+              ) : isEnabled ? (
                 <Text>{t(messages.twoFactorActiveDescription)}</Text>
               ) : (
                 <Text>{t(messages.twoFactorUserDescription)}</Text>
               )}
 
-              {isEnabled && isRequired ? (
+              {isConfigured === true && isEnabled && isRequired ? (
                 <TooltipTrigger>
                   <Row alignItems="center" gap="3">
                     <Switch
@@ -80,7 +84,9 @@ export function UserSecurityPage() {
                   </Row>
                   <Tooltip>{t(messages.twoFactorRequiredMessage)}</Tooltip>
                 </TooltipTrigger>
-              ) : (
+              ) : null}
+
+              {isConfigured === true && !isEnabled ? (
                 <Row alignItems="center" gap="3">
                   <Switch
                     isSelected={isEnabled}
@@ -89,9 +95,20 @@ export function UserSecurityPage() {
                   />
                   <Text>{t(labels.twoFactorEnable)}</Text>
                 </Row>
-              )}
+              ) : null}
 
-              {isEnabled && isRequired && (
+              {isConfigured === true && isEnabled && !isRequired ? (
+                <Row alignItems="center" gap="3">
+                  <Switch
+                    isSelected={isEnabled}
+                    isDisabled={isEnabled && isRequired}
+                    onChange={handleToggle}
+                  />
+                  <Text>{t(labels.twoFactorEnable)}</Text>
+                </Row>
+              ) : null}
+
+              {isConfigured === true && isEnabled && isRequired && (
                 <Text size="sm" color="muted">
                   {t(messages.twoFactorRequiredMessage)}
                 </Text>
