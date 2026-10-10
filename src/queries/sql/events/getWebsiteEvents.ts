@@ -1,13 +1,14 @@
 import clickhouse from '@/lib/clickhouse';
-import { DEFAULT_PAGE_SIZE } from '@/lib/constants';
-import { EVENT_TYPE } from '@/lib/constants';
+import { DEFAULT_PAGE_SIZE, EVENT_TYPE } from '@/lib/constants';
 import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
-import type { QueryFilters } from '@/lib/types';
+import type { PageResult, QueryFilters, WebsiteEvent } from '@/lib/types';
 
 const FUNCTION_NAME = 'getWebsiteEvents';
 
-export function getWebsiteEvents(...args: [websiteId: string, filters: QueryFilters]) {
+export function getWebsiteEvents(
+  ...args: [websiteId: string, filters: QueryFilters]
+): Promise<PageResult<WebsiteEvent[]>> {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
     [CLICKHOUSE]: () => clickhouseQuery(...args),
@@ -100,7 +101,7 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
       (paged_event_data.event_id is not null) as "hasData"
     from paged_events
     join website_event on website_event.event_id = paged_events.event_id
-    join session on session.session_id = website_event.session_id
+    left join session on session.session_id = website_event.session_id
       and session.website_id = website_event.website_id
     left join paged_event_data on paged_event_data.event_id = website_event.event_id
     order by paged_events.created_at desc
