@@ -189,23 +189,16 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$SERVER" >> ~/.ssh/known_hosts
 
-      # Job-scoped GHCR creds in a throwaway DOCKER_CONFIG on the manager, so --with-registry-auth
-      # always forwards working creds to the workers (root's own docker config is left alone).
-      - name: Login to GHCR on manager
+      # The key is restricted on the manager: its forced command (/usr/local/sbin/ci-deploy-umami)
+      # logs in to GHCR with the job-scoped token read from stdin, then rolls umami_umami onto
+      # `latest` (healthcheck-gated, automatic rollback). The command sent here is ignored.
+      - name: Update Swarm service
         env:
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          printf '%s' "$GHCR_TOKEN" | ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes root@"$SERVER" \
-            "DOCKER_CONFIG=/root/.docker-ci-umami docker login ghcr.io -u '$GHCR_USER' --password-stdin"
-
-      # The update re-resolves `latest` to the digest just pushed; the service healthcheck
-      # (/api/heartbeat) gates the switch and a failed update rolls back by itself.
-      - name: Update Swarm service
-        run: |
           set -e
-          out=$(ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes root@"$SERVER" \
-            "DOCKER_CONFIG=/root/.docker-ci-umami docker service update --with-registry-auth --detach=false --update-monitor 15s --update-failure-action rollback --image $IMAGE $SERVICE" 2>&1) || { echo "$out"; exit 1; }
+          out=$(printf '%s\n%s\n' "$GHCR_USER" "$GHCR_TOKEN" | ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes ci-umami@"$SERVER" deploy 2>&1) || { echo "$out"; exit 1; }
           echo "$out"
           if echo "$out" | grep -q 'could not be accessed on a registry'; then
             echo "::error::manager could not resolve $IMAGE (GHCR auth?)" >&2
@@ -215,8 +208,3 @@ jobs:
             echo "::error::$SERVICE rolled back or was paused during update" >&2
             exit 1
           fi
-
-      - name: Logout from GHCR on manager
-        if: always()
-        run: |
-          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes root@"$SERVER" "rm -rf /root/.docker-ci-umami" || true
