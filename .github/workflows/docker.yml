@@ -158,3 +158,65 @@ jobs:
             ${{ env.IMAGE_NAME }}:master-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max,ignore-error=true
+
+  deploy:
+    name: Deploy
+    # Only the image pushed from master is deployed: `latest` is the tag the Swarm service follows.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    concurrency:
+      group: umami-prod-deploy
+      cancel-in-progress: false
+    environment: prod
+    env:
+      SERVER: ${{ vars.SERVER_ADDRESS }}
+      IMAGE: ghcr.io/polyjapan/umami-sso:latest
+      SERVICE: umami_umami
+
+    steps:
+      - name: Prepare SSH key
+        env:
+          SSH_PRIVATE_KEY_B64: ${{ secrets.SSH_PRIVATE_KEY_B64 }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          printf '%s' "$SSH_PRIVATE_KEY_B64" | base64 --decode > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$SERVER" >> ~/.ssh/known_hosts
+
+      # Job-scoped GHCR creds in a throwaway DOCKER_CONFIG on the manager, so --with-registry-auth
+      # always forwards working creds to the workers (root's own docker config is left alone).
+      - name: Login to GHCR on manager
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes root@"$SERVER" \
+            "DOCKER_CONFIG=/root/.docker-ci-umami docker login ghcr.io -u '$GHCR_USER' --password-stdin"
+
+      # The update re-resolves `latest` to the digest just pushed; the service healthcheck
+      # (/api/heartbeat) gates the switch and a failed update rolls back by itself.
+      - name: Update Swarm service
+        run: |
+          set -e
+          out=$(ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes root@"$SERVER" \
+            "DOCKER_CONFIG=/root/.docker-ci-umami docker service update --with-registry-auth --detach=false --update-monitor 15s --update-failure-action rollback --image $IMAGE $SERVICE" 2>&1) || { echo "$out"; exit 1; }
+          echo "$out"
+          if echo "$out" | grep -q 'could not be accessed on a registry'; then
+            echo "::error::manager could not resolve $IMAGE (GHCR auth?)" >&2
+            exit 1
+          fi
+          if echo "$out" | grep -qE 'rollback:|update paused'; then
+            echo "::error::$SERVICE rolled back or was paused during update" >&2
+            exit 1
+          fi
+
+      - name: Logout from GHCR on manager
+        if: always()
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes root@"$SERVER" "rm -rf /root/.docker-ci-umami" || true
