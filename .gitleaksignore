@@ -1,0 +1,3 @@
+# Upstream umami test fixtures (fake JWT / placeholder key), flagged once the upstream history became reachable.
+b185837063f4d63ffe01f565e5791c69b3c9c424:src/lib/mcp/auth.test.ts:generic-api-key:37
+e18769e8cf65669572bc87522fd53712e738bd35:docker-compose.test.yml:generic-api-key:36
