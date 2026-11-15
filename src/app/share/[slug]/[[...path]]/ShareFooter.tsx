@@ -1,14 +1,12 @@
 'use client';
-import { Column, Row } from '@umami/react-zen';
+import { Column, Row, Text } from '@umami/react-zen';
 import { useShare } from '@/components/hooks';
 import { ShareBranding } from './ShareBranding';
 
+const TERMS_URL = 'https://chanwe.ar/es/terminos';
+
 export function ShareFooter() {
   const share = useShare();
-
-  if (!share?.whiteLabel) {
-    return null;
-  }
 
   return (
     <Column
@@ -17,8 +15,13 @@ export function ShareFooter() {
       maxWidth="1320px"
       style={{ margin: '0 auto' }}
     >
-      <Row border="top" justifyContent="flex-end" paddingY="4">
-        <ShareBranding size="sm" />
+      <Row border="top" justifyContent="space-between" alignItems="center" gap paddingY="4">
+        <Text size="sm" color="muted">
+          <a href={TERMS_URL} target="_blank" rel="noopener">
+            Términos y condiciones
+          </a>
+        </Text>
+        {share?.whiteLabel && <ShareBranding size="sm" />}
       </Row>
     </Column>
   );

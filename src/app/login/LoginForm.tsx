@@ -106,6 +106,11 @@ export function LoginForm() {
           </FormButtons>
         </Form>
       )}
+      <Text size="sm" color="muted">
+        <a href="https://chanwe.ar/es/terminos" target="_blank" rel="noopener">
+          Términos y condiciones
+        </a>
+      </Text>
     </Column>
   );
 }
