@@ -5,6 +5,8 @@ https://github.com/umami-software/umami/releases
 
 ## Unreleased
 
+- CHANWE v2 brand copies synced from chanwe-brandbook 2.0.1 (`pnpm brand:sync`): 12 files (v2 wordmark, icons and favicons; generated files only change the brand paths in their comments).
+
 - Brand copies refreshed from kit 1.1.0 (`pnpm brand:sync`): fg-subtle is now #5B6677, new tokens primary-hover, primary-pressed and shell-bar.
 - Docs: `docs/es/` and `docs/en/` with `start_here.md`, `data-tree.md` and `guide.md` for CHANWE's layer; this file
   renamed from `CHANGELOG.chanwe.md`.
