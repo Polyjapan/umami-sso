@@ -9,6 +9,7 @@
   --cw-brand-ink-fg: #64748B;
   --cw-brand-ink-subtle: #646464;
   --cw-brand-rule-ink: #434D5D;
+  --cw-brand-dusk: #24394A;
   --cw-brand-fg: #111319;
   --cw-brand-body-fg: #475569;
   --cw-brand-fg-muted: #475569;
@@ -71,6 +72,7 @@
   --cw-brand-violet-soft: #EFE7FD;
   --cw-brand-canvas: #E9EEF4;
   --cw-brand-pane: #FFFFFF;
+  --cw-brand-favorite: #FFCC00;
   --cw-brand-primary-hsl: 10.1 98.3% 52.7%;
   --cw-brand-primary-text-hsl: 10.1 98.3% 52.7%;
   --cw-brand-primary-active-hsl: 10.1 98.3% 52.7%;
@@ -80,6 +82,7 @@
   --cw-brand-ink-fg-hsl: 215.4 16.3% 46.9%;
   --cw-brand-ink-subtle-hsl: 0 0% 39.2%;
   --cw-brand-rule-ink-hsl: 216.9 16.2% 31.4%;
+  --cw-brand-dusk-hsl: 206.8 34.5% 21.6%;
   --cw-brand-fg-hsl: 225 19% 8.2%;
   --cw-brand-body-fg-hsl: 215.3 19.3% 34.5%;
   --cw-brand-fg-muted-hsl: 215.3 19.3% 34.5%;
@@ -141,6 +144,7 @@
   --cw-brand-violet-soft-hsl: 262 85% 95%;
   --cw-brand-canvas-hsl: 212.7 33.3% 93.5%;
   --cw-brand-pane-hsl: 0 0% 100%;
+  --cw-brand-favorite-hsl: 48 100% 50%;
   --cw-brand-role-foreground: #475569;
   --cw-brand-role-background: #F8FAFC;
   --cw-brand-role-primary: #FD3810;
@@ -163,6 +167,9 @@
   --cw-brand-radius-pill: 999px;
   --cw-brand-radius-surface: 16px;
   --cw-brand-radius-band: 24px;
+  --cw-brand-radius-print-band: 16px;
+  --cw-brand-radius-print-pane: 12px;
+  --cw-brand-radius-print-dense: 8px;
   --cw-brand-ease-out: cubic-bezier(.22, 1, .36, 1);
   --cw-brand-ease-standard: cubic-bezier(.4, 0, .2, 1);
   --cw-brand-ease-emphasis: cubic-bezier(.16, 1, .3, 1);
@@ -182,8 +189,10 @@
   --cw-brand-edge: color-mix(in srgb, #FFFFFF 85%, transparent);
   --cw-brand-tint: color-mix(in srgb, #64748B 13%, transparent);
   --cw-brand-tint-strong: color-mix(in srgb, #64748B 21%, transparent);
+  --cw-brand-tint-soft: color-mix(in srgb, #64748B 7%, transparent);
   --cw-brand-glass: color-mix(in srgb, #FFFFFF 72%, transparent);
   --cw-brand-glass-blur: 18px;
+  --cw-brand-dots-on-theme: color-mix(in srgb, #111319 7%, transparent);
   --cw-brand-shell-bar: 56px;
   --cw-brand-space-2xs: 4px;
   --cw-brand-space-xs: 8px;
@@ -233,6 +242,38 @@
   --cw-brand-plot-line-width: 2px;
   --cw-brand-plot-point-size: 3px;
   --cw-brand-plot-bar-radius: 3px;
+  --cw-brand-callout-dot: 7px;
+  --cw-brand-callout-label-tracking: 0.14em;
+  --cw-brand-callout-radius: 12px;
+  --cw-brand-callout-special-surface: #111319;
+  --cw-brand-callout-special-fg: #FFFFFF;
+  --cw-brand-callout-special-label: #C6CDD6;
+  --cw-brand-callout-special-rule: #434D5D;
+  --cw-brand-callout-special-radius: 24px;
+  --cw-brand-eyebrow-dot: 7px;
+  --cw-brand-eyebrow-tracking: 0.14em;
+  --cw-brand-code-surface: #232A35;
+  --cw-brand-code-fg: #C6CDD6;
+  --cw-brand-code-label: #8A94A6;
+  --cw-brand-code-output: #8A94A6;
+  --cw-brand-code-prompt: #FD3810;
+  --cw-brand-code-radius: 12px;
+  --cw-brand-syntax-keyword: #FD3810;
+  --cw-brand-syntax-string: #34C759;
+  --cw-brand-syntax-number: #AF52DE;
+  --cw-brand-syntax-operator: #00C7BE;
+  --cw-brand-syntax-function: #F8FAFC;
+  --cw-brand-syntax-type: #FF9500;
+  --cw-brand-syntax-comment: #8A94A6;
+  --cw-brand-syntax-function-weight: 700;
+  --cw-brand-syntax-comment-style: italic;
+  --cw-brand-dots-step: 18px;
+  --cw-brand-dots-size: 1px;
+  --cw-brand-dots-on-light: color-mix(in srgb, #111319 7%, transparent);
+  --cw-brand-dots-on-ink: color-mix(in srgb, #FFFFFF 5%, transparent);
+  --cw-brand-dots-origin: 100% 0%;
+  --cw-brand-dots-fade-reach: 70%;
+  --cw-brand-dots-fade-soft: 100%;
   color-scheme: light;
 }
 /* The dark theme (0.42.0): chosen by the page (data-theme) or by the system unless the page says light. */
@@ -269,6 +310,7 @@
   --cw-brand-research-muted: #7E8390;
   --cw-brand-canvas: #232A35;
   --cw-brand-pane: #111319;
+  --cw-brand-favorite: #FFD60A;
   --cw-brand-ink-hsl: 216 29.4% 96.7%;
   --cw-brand-ink-fg-hsl: 215 20% 65%;
   --cw-brand-ink-subtle-hsl: 216.9 7.4% 65.7%;
@@ -300,6 +342,7 @@
   --cw-brand-research-muted-hsl: 223.3 7.5% 52.9%;
   --cw-brand-canvas-hsl: 216.7 20.5% 17.3%;
   --cw-brand-pane-hsl: 225 19% 8.2%;
+  --cw-brand-favorite-hsl: 50 100% 52%;
   --cw-brand-shadow-rest: 0 1px 2px rgba(0, 0, 0, 0.3);
   --cw-brand-shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.3), 0 22px 40px -26px rgba(0, 0, 0, 0.6);
   --cw-brand-shadow-overlay: 0 24px 64px -24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
@@ -307,7 +350,9 @@
   --cw-brand-edge: rgba(255, 255, 255, 0.1);
   --cw-brand-tint: color-mix(in srgb, #94A3B8 12%, transparent);
   --cw-brand-tint-strong: color-mix(in srgb, #94A3B8 19%, transparent);
+  --cw-brand-tint-soft: color-mix(in srgb, #94A3B8 12%, transparent);
   --cw-brand-glass: color-mix(in srgb, #111319 72%, transparent);
+  --cw-brand-dots-on-theme: color-mix(in srgb, #FFFFFF 5%, transparent);
   --cw-brand-primary-hover: #FC4723;
   --cw-brand-primary-pressed: #FC5635;
   color-scheme: dark;
@@ -346,6 +391,7 @@
     --cw-brand-research-muted: #7E8390;
     --cw-brand-canvas: #232A35;
     --cw-brand-pane: #111319;
+    --cw-brand-favorite: #FFD60A;
     --cw-brand-ink-hsl: 216 29.4% 96.7%;
     --cw-brand-ink-fg-hsl: 215 20% 65%;
     --cw-brand-ink-subtle-hsl: 216.9 7.4% 65.7%;
@@ -377,6 +423,7 @@
     --cw-brand-research-muted-hsl: 223.3 7.5% 52.9%;
     --cw-brand-canvas-hsl: 216.7 20.5% 17.3%;
     --cw-brand-pane-hsl: 225 19% 8.2%;
+    --cw-brand-favorite-hsl: 50 100% 52%;
     --cw-brand-shadow-rest: 0 1px 2px rgba(0, 0, 0, 0.3);
     --cw-brand-shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.3), 0 22px 40px -26px rgba(0, 0, 0, 0.6);
     --cw-brand-shadow-overlay: 0 24px 64px -24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
@@ -384,7 +431,9 @@
     --cw-brand-edge: rgba(255, 255, 255, 0.1);
     --cw-brand-tint: color-mix(in srgb, #94A3B8 12%, transparent);
     --cw-brand-tint-strong: color-mix(in srgb, #94A3B8 19%, transparent);
+    --cw-brand-tint-soft: color-mix(in srgb, #94A3B8 12%, transparent);
     --cw-brand-glass: color-mix(in srgb, #111319 72%, transparent);
+    --cw-brand-dots-on-theme: color-mix(in srgb, #FFFFFF 5%, transparent);
     --cw-brand-primary-hover: #FC4723;
     --cw-brand-primary-pressed: #FC5635;
     color-scheme: dark;
